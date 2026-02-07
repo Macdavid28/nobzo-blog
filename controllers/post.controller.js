@@ -33,6 +33,8 @@ export const createPost = async(req,res) =>{
     }
 }
 
+
+
 export const getPosts = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -42,19 +44,43 @@ export const getPosts = async (req, res) => {
         const authorId = req.query.author || "";
         const status = req.query.status || "published";
 
+        // Optional Auth Logic
+        const token = req.headers.authorization?.split(" ")[1];
+        if (token) {
+            try {
+                const decode = jwt.verify(token, process.env.JWT_SECRET);
+                req.userId = decode.userId;
+            } catch (error) {
+                console.log("Token verification failed:", error.message);
+                // Invalid token, treat as public
+            }
+        }
+
+        console.log("User ID:", req.userId);
+        console.log("Status Query:", status);
+
         const query = { deletedAt: null };
 
-        if (!req.userId && status !== "published") {
+        let selectFields = "";
+        let populateFields = "name email";
+
+        if (!req.userId) {
+             // Public user
              query.status = "published";
-        } else if (req.userId && status) {
+             // Hide status
+             selectFields = "-status"; 
+
+             // Hide email
+             populateFields = "name";
+        } else {
+             // Auth user
              if (status === 'draft') {
+                 // Custom to them: can only see their own drafts
                  query.status = 'draft';
                  query.author = req.userId;
              } else {
                  query.status = status;
              }
-        } else {
-            query.status = "published";
         }
 
         if (search) {
@@ -74,9 +100,10 @@ export const getPosts = async (req, res) => {
 
         const posts = await Post.find(query)
             .sort({ createdAt: -1 })
+            .select(selectFields)
             .skip((page - 1) * limit)
             .limit(limit)
-            .populate("author", "name email");
+            .populate("author", populateFields);
 
         const total = await Post.countDocuments(query);
 
