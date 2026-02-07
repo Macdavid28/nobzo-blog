@@ -44,6 +44,8 @@ export const getPosts = async (req, res) => {
         const authorId = req.query.author || "";
         const status = req.query.status || "published";
 
+import fs from 'fs';
+
         // Optional Auth Logic
         const token = req.headers.authorization?.split(" ")[1];
         if (token) {
@@ -51,13 +53,11 @@ export const getPosts = async (req, res) => {
                 const decode = jwt.verify(token, process.env.JWT_SECRET);
                 req.userId = decode.userId;
             } catch (error) {
-                console.log("Token verification failed:", error.message);
-                // Invalid token, treat as public
+                fs.appendFileSync('debug.log', `Token verify error: ${error.message}\n`);
             }
         }
 
-        console.log("User ID:", req.userId);
-        console.log("Status Query:", status);
+        fs.appendFileSync('debug.log', `User: ${req.userId}, Status: ${status}, Token: ${token || 'none'}\n`);
 
         const query = { deletedAt: null };
 
