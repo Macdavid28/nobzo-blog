@@ -53,7 +53,7 @@ A simple yet robust REST API for a blog application built with Node.js, Express,
     ```env
     PORT=5000
     MONGODB_URI=mongodb://localhost:27017/nobzo-blog
-    JWT_SECRET=your_super_secret_key_change_this
+    JWT_SECRET=your_secret_key
     ```
 
 4.  Start the Server:
@@ -186,12 +186,13 @@ A simple yet robust REST API for a blog application built with Node.js, Express,
       "content": "This is the content of my first post.",
       "author": {
         "_id": "60d5ecb8b5c9c62b8c8b4567",
-        "name": "John Doe",
-        "email": "john@example.com"
+        "name": "John Doe"
       },
       "tags": ["tech", "nodejs"],
       "status": "published",
-      "createdAt": "2024-02-07T10:05:00.000Z"
+      "deletedAt": null,
+      "createdAt": "2024-02-07T10:05:00.000Z",
+      "updatedAt": "2024-02-07T10:05:00.000Z"
     }
   ],
   "pagination": {
